@@ -14,7 +14,7 @@ scheduled reports.
 ```bash
 cp .env.example .env
 ```
-Edit `.env` and fill in `BOT_TOKEN` and `ALLOWED_USER_IDS`. Never commit this file.
+Edit `.env` and fill in `BOT_HTTPS_KEY` and `ALLOWED_USERS`. Never commit this file.
 
 ### 3. Install dependencies
 ```bash

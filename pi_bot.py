@@ -40,14 +40,14 @@ from telegram.ext import (ApplicationBuilder, CommandHandler, ContextTypes, Call
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_HTTPS_KEY")
-ALLOWED_USER_IDS = {int(uid.strip()) for uid in os.environ["ALLOWED_USER_IDS"].split(",")}
+ALLOWED_USER_IDS = {int(uid.strip()) for uid in os.environ["ALLOWED_USERS"].split(",")}
 
 # Services to watch and allow restarting
 WATCHED_SERVICES = ["nginx", "ssh", "docker"]
 
 # Whitelisted shell commands for /run (never allow arbitrary commands!)
 
-AlLOWED_COMMANDS = {
+ALLOWED_COMMANDS = {
     "uptime": "uptime",
     "who": "who",
     "df": "df -h",
@@ -76,7 +76,7 @@ def get_cpu_temp() -> float:
     try:
         with open("/sys/class/thermal/thermal_zone0/temp") as f:
             return int(f.read()) / 1000.0
-    except FileNotFoundError: 
+    except FileNotFoundError:
         return -1
 
 def get_status_text() -> str:
@@ -85,7 +85,7 @@ def get_status_text() -> str:
     disk = psutil.disk_usage('/')
     load1,load5,load15 = psutil.getloadavg()
     uptime_seconds = time.time() - psutil.boot_time()
-    days, rem = divmod(int(uptime_s), 86400) 
+    days, rem = divmod(int(uptime_seconds), 86400)
     hours, rem = divmod(rem, 3600)
     minutes = rem // 60
     return (
@@ -171,7 +171,7 @@ async def cmd_services(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines) or "No services configured.")
  
 
- async def cmd_restart_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_restart_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return
     if not context.args:
@@ -407,7 +407,16 @@ def register_scheduled_tasks(app):
 
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).build()
+    # Python 3.14 removed the implicit event-loop creation that older asyncio
+    # versions relied on, which trips up run_polling() internally calling
+    # asyncio.get_event_loop(). Create and register one explicitly so it's
+    # there when the library looks for it. Harmless no-op on older Python.
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("services", cmd_services))
