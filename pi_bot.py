@@ -43,7 +43,7 @@ BOT_TOKEN = os.getenv("BOT_HTTPS_KEY")
 ALLOWED_USER_IDS = {int(uid.strip()) for uid in os.environ["ALLOWED_USERS"].split(",")}
 
 # Services to watch and allow restarting
-WATCHED_SERVICES = ["nginx", "ssh", "docker"]
+WATCHED_SERVICES = ["ssh", "docker"]
 
 # Whitelisted shell commands for /run (never allow arbitrary commands!)
 
@@ -146,13 +146,20 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return
     await update.message.reply_text(
-        "Pi monitor online. Commands:\n"
-        "/status /services /ip\n"
-        "/restart <service>\n"
-        "/run <name>\n"
-        "/docker /dstart /dstop /drestart /dlogs <name>\n"
-        "/speedtest\n"
-        "/reboot /shutdown"
+        "Pi monitor online. Commands:\n\n"
+        "/status - CPU temp, load, RAM, disk, uptime\n"
+        "/services - Status of watched services\n"
+        "/ip - Local + public IP\n"
+        "/restart <service> - Restart a whitelisted service\n"
+        "/run <name> - Run a whitelisted shell command\n"
+        "/docker - List containers and their status\n"
+        "/dstart <name> - Start a container\n"
+        "/dstop <name> - Stop a container\n"
+        "/drestart <name> - Restart a container\n"
+        "/dlogs <name> - Last 30 lines of a container's logs\n"
+        "/speedtest - Run an internet speed test (~20-30s)\n"
+        "/reboot - Reboot the Pi (asks for confirmation)\n"
+        "/shutdown - Shut down the Pi (asks for confirmation)"
     )
 
 
