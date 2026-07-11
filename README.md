@@ -99,5 +99,4 @@ pi-bot/
 ├── .env                # your secrets (gitignored, not committed)
 ├── .gitignore
 ├── DEPRECATED.md        # notice for the old telebot-based script
-└── legacy/              # optional: old script kept for reference only
 ```
